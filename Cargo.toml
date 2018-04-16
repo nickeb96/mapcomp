@@ -1,0 +1,11 @@
+[package]
+name = "mapcomp"
+version = "0.1.0"
+authors = ["Nicholas Boyle <nickboyle5496@gmail.com>"]
+license = "MIT OR Apache-2.0"
+readme = "README.md"
+description = "Python-like list comprehensions for standard containers"
+categories = ["rust-patterns"]
+keywords = ["vector", "comprehension", "macro", "generator", "python"]
+
+[dependencies]
