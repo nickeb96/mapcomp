@@ -7,5 +7,7 @@ readme = "README.md"
 description = "Python-like list comprehensions for standard containers"
 categories = ["rust-patterns"]
 keywords = ["vector", "comprehension", "macro", "generator", "python"]
+repository = "https://github.com/nickeb96/mapcomp"
+documentation = "https://docs.rs/mapcomp"
 
 [dependencies]
