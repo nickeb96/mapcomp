@@ -68,7 +68,7 @@ impl<G: ::std::ops::Generator> Iterator for GeneratorIterator<G> {
 
     fn next(&mut self) -> Option<Self::Item> {
         use ::std::ops::GeneratorState;
-        match self.generator.resume() {
+        match unsafe { self.generator.resume() } {
             GeneratorState::Yielded(y) => Some(y),
             _ => None,
         }
