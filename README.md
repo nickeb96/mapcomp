@@ -2,6 +2,8 @@
 mapcomp
 =======
 
+![Build Status](https://travis-ci.org/nickeb96/mapcomp)
+
 Python-like list comprehension via macros for the following standard
 containers:
 

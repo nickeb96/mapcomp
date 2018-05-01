@@ -10,4 +10,7 @@ keywords = ["vector", "comprehension", "macro", "generator", "python"]
 repository = "https://github.com/nickeb96/mapcomp"
 documentation = "https://docs.rs/mapcomp"
 
+[badges]
+cravis-ci = { repository = "nickeb96/mapcomp" }
+
 [dependencies]
