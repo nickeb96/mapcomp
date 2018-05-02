@@ -2,7 +2,8 @@
 mapcomp
 =======
 
-![Build Status](https://travis-ci.org/nickeb96/mapcomp)
+![crates.io](https://img.shields.io/crates/v/mapcomp.svg)
+![Build Status](https://travis-ci.org/nickeb96/mapcomp.svg?branch=master)
 
 Python-like list comprehension via macros for the following standard
 containers:
