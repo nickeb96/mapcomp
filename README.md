@@ -2,7 +2,7 @@
 mapcomp
 =======
 
-![crates.io](https://img.shields.io/crates/v/mapcomp.svg)
+[![crates.io](https://img.shields.io/crates/v/mapcomp.svg)](https://crates.io/crates/mapcomp)
 ![Build Status](https://travis-ci.org/nickeb96/mapcomp.svg?branch=master)
 
 Python-like list comprehension via macros for the following standard
