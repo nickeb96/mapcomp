@@ -81,7 +81,7 @@ impl<G: ::std::ops::Generator> Iterator for GeneratorIterator<G> {
 ///
 /// Returns an iterator over the contents of the comprehension.  It is
 /// analogous to [Python's generator comprehensions](https://www.python.org/dev/peps/pep-0289/).
-/// Syntactically.  It is similar to the `vecc![]` macro but it returns a lazily
+/// Syntactically, it is similar to the `vecc![]` macro but it returns a lazily
 /// evaluated iterator instead of a container.  It's use requires the experimental
 /// generators feature.
 ///
