@@ -12,6 +12,6 @@ repository = "https://github.com/nickeb96/mapcomp"
 documentation = "https://docs.rs/mapcomp"
 
 [badges]
-cravis-ci = { repository = "nickeb96/mapcomp" }
+travis-ci = { repository = "nickeb96/mapcomp" }
 
 [dependencies]
