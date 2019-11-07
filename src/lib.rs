@@ -47,28 +47,28 @@
 //! ```
 
 
-#![feature(generators, generator_trait)]
+#![feature(generators, generator_trait, arbitrary_self_types)]
 
 
 /// This is an implementation detail used by `iterc!()` and it should not be
 /// directly instantiated.
 #[doc(hidden)]
-pub struct GeneratorIterator<G: ::std::ops::Generator> {
+pub struct GeneratorIterator<G: ::std::ops::Generator + ::std::marker::Unpin> {
     generator: G,
 }
 
-impl<G: ::std::ops::Generator> GeneratorIterator<G> {
+impl<G: ::std::ops::Generator + ::std::marker::Unpin> GeneratorIterator<G> {
     pub fn new(generator: G) -> GeneratorIterator<G> {
         GeneratorIterator { generator }
     }
 }
 
-impl<G: ::std::ops::Generator> Iterator for GeneratorIterator<G> {
+impl<G: ::std::ops::Generator + ::std::marker::Unpin> Iterator for GeneratorIterator<G> {
     type Item = G::Yield;
 
     fn next(&mut self) -> Option<Self::Item> {
         use ::std::ops::GeneratorState;
-        match unsafe { self.generator.resume() } {
+        match ::std::pin::Pin::new(&mut self.generator).resume() {
             GeneratorState::Yielded(y) => Some(y),
             _ => None,
         }
