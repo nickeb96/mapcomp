@@ -68,7 +68,7 @@ impl<G: ::std::ops::Generator + ::std::marker::Unpin> Iterator for GeneratorIter
 
     fn next(&mut self) -> Option<Self::Item> {
         use ::std::ops::GeneratorState;
-        match ::std::pin::Pin::new(&mut self.generator).resume() {
+        match ::std::pin::Pin::new(&mut self.generator).resume(()) {
             GeneratorState::Yielded(y) => Some(y),
             _ => None,
         }
