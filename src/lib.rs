@@ -1,6 +1,6 @@
 //! Macros for container comprehensions similar to Python's list comprehension.
 //!
-//! This crate adds vector, set, map, and generator comprehensions.  It is
+//! This crate adds vector, set, map, and coroutine comprehensions.  It is
 //! meant to complement [maplit](https://docs.rs/maplit/) which provides
 //! macro literals for the same standard containers.
 //!
@@ -18,7 +18,7 @@
 //!
 //! The macro names are the same as maplit's container literal macros but with
 //! a **c** at the end for **c**omprehension.  There is an additional macro
-//! `iterc!()` for creating lazily evaluated generator expressions.
+//! `iterc!()` for creating lazily evaluated coroutine expressions.
 //!
 //! List comprehensions exist [in many languages](https://en.wikipedia.org/wiki/List_comprehension)
 //! and in many styles.  This crate uses the same syntax as Python's list
@@ -45,110 +45,122 @@
 //! # }
 //! ```
 
-#![feature(coroutines, coroutine_trait, arbitrary_self_types)]
+#![cfg_attr(
+    feature = "coroutines",
+    feature(coroutines, coroutine_trait, stmt_expr_attributes)
+)]
 
-/// This is an implementation detail used by `iterc!()` and it should not be
-/// directly instantiated.
+#[cfg(feature = "coroutines")]
 #[doc(hidden)]
-pub struct GeneratorIterator<G: ::std::ops::Coroutine + ::std::marker::Unpin> {
-    generator: G,
-}
-
-impl<G: ::std::ops::Coroutine + ::std::marker::Unpin> GeneratorIterator<G> {
-    pub fn new(generator: G) -> GeneratorIterator<G> {
-        GeneratorIterator { generator }
+pub mod iterator_comprehension {
+    /// This is an implementation detail used by `iterc!()` and it should not be
+    /// directly instantiated.
+    #[doc(hidden)]
+    pub struct CoroutineIterator<C: ::std::ops::Coroutine + ::std::marker::Unpin> {
+        coroutine: C,
     }
-}
 
-impl<G: ::std::ops::Coroutine + ::std::marker::Unpin> Iterator for GeneratorIterator<G> {
-    type Item = G::Yield;
-
-    fn next(&mut self) -> Option<Self::Item> {
-        use ::std::ops::CoroutineState;
-        match ::std::pin::Pin::new(&mut self.generator).resume(()) {
-            CoroutineState::Yielded(y) => Some(y),
-            _ => None,
+    impl<C: ::std::ops::Coroutine + ::std::marker::Unpin> CoroutineIterator<C> {
+        pub fn new(coroutine: C) -> CoroutineIterator<C> {
+            CoroutineIterator { coroutine }
         }
     }
-}
 
-/// Iterator Comprehension
-///
-/// Returns an iterator over the contents of the comprehension.  It is
-/// analogous to [Python's generator comprehensions](https://www.python.org/dev/peps/pep-0289/).
-/// Syntactically, it is similar to the `vecc![]` macro but it returns a lazily
-/// evaluated iterator instead of a container.  It's use requires the experimental
-/// generators feature.
-///
-/// ```rust
-/// #![feature(generators, generator_trait)]
-/// #[macro_use]
-/// extern crate mapcomp;
-///
-/// # fn main() {
-/// let numbers = [8, 3, 5, 7];
-///
-/// let mut powers_of_two = iterc!(1 << x; for x in &numbers);
-///
-/// assert_eq!(Some(256), powers_of_two.next());
-/// assert_eq!(Some(8), powers_of_two.next());
-/// assert_eq!(Some(32), powers_of_two.next());
-/// assert_eq!(Some(128), powers_of_two.next());
-/// assert_eq!(None, powers_of_two.next());
-/// # }
-/// ```
-///
-/// Since it only creates an iterator and not a fully populated container, the
-/// comprehension can be created over an unbounded or infinite iterator.
-///
-/// ```rust
-/// # #![feature(generators, generator_trait)]
-/// # #[macro_use] extern crate mapcomp;
-/// # fn main() {
-/// let mut odd_squares = iterc!(x * x; for x in 1..; if x % 2 == 1);
-///
-/// assert_eq!(Some(1), odd_squares.next());
-/// assert_eq!(Some(9), odd_squares.next());
-/// assert_eq!(Some(25), odd_squares.next());
-/// assert_eq!(Some(49), odd_squares.next());
-/// # }
-/// ```
-#[macro_export]
-macro_rules! iterc {
-    (@__ $exp:expr; for $item:pat in $iter:expr; if $cond:expr) => (
-        for $item in $iter {
-            if $cond {
+    impl<C: ::std::ops::Coroutine + ::std::marker::Unpin> Iterator for CoroutineIterator<C> {
+        type Item = C::Yield;
+
+        fn next(&mut self) -> Option<Self::Item> {
+            use ::std::ops::CoroutineState;
+            match ::std::pin::Pin::new(&mut self.coroutine).resume(()) {
+                CoroutineState::Yielded(y) => Some(y),
+                _ => None,
+            }
+        }
+    }
+
+    /// Iterator Comprehension
+    ///
+    /// Returns an iterator over the contents of the comprehension.  It is
+    /// analogous to [Python's generator comprehensions](https://www.python.org/dev/peps/pep-0289/).
+    /// Syntactically, it is similar to the `vecc![]` macro but it returns a lazily
+    /// evaluated iterator instead of a container.  It's use requires the experimental
+    /// coroutines feature.
+    ///
+    #[cfg_attr(
+        feature = "coroutines",
+        doc = r##"
+```rust
+#![feature(coroutines, coroutine_trait, stmt_expr_attributes)]
+#[macro_use]
+extern crate mapcomp;
+
+# fn main() {
+let numbers = [8, 3, 5, 7];
+
+let mut powers_of_two = iterc!(1 << x; for x in &numbers);
+
+assert_eq!(Some(256), powers_of_two.next());
+assert_eq!(Some(8), powers_of_two.next());
+assert_eq!(Some(32), powers_of_two.next());
+assert_eq!(Some(128), powers_of_two.next());
+assert_eq!(None, powers_of_two.next());
+# }
+```
+
+Since it only creates an iterator and not a fully populated container, the
+comprehension can be created over an unbounded or infinite iterator.
+
+```rust
+# #![feature(coroutines, coroutine_trait, stmt_expr_attributes)]
+# #[macro_use] extern crate mapcomp;
+# fn main() {
+let mut odd_squares = iterc!(x * x; for x in 1..; if x % 2 == 1);
+
+assert_eq!(Some(1), odd_squares.next());
+assert_eq!(Some(9), odd_squares.next());
+assert_eq!(Some(25), odd_squares.next());
+assert_eq!(Some(49), odd_squares.next());
+# }
+```
+"##
+    )]
+    #[macro_export]
+    macro_rules! iterc {
+        (@__ $exp:expr; for $item:pat in $iter:expr; if $cond:expr) => (
+            for $item in $iter {
+                if $cond {
+                    yield $exp;
+                }
+            }
+        );
+
+        (@__ $exp:expr; for $item:pat in $iter:expr) => (
+            for $item in $iter {
                 yield $exp;
             }
-        }
-    );
+        );
 
-    (@__ $exp:expr; for $item:pat in $iter:expr) => (
-        for $item in $iter {
-            yield $exp;
-        }
-    );
+        (@__ $exp:expr; for $item:pat in $iter:expr; if $cond:expr; $($tail:tt)+) => (
+            for $item in $iter {
+                if $cond {
+                    iterc!(@__ $exp; $($tail)+)
+                }
+            }
+        );
 
-    (@__ $exp:expr; for $item:pat in $iter:expr; if $cond:expr; $($tail:tt)+) => (
-        for $item in $iter {
-            if $cond {
+        (@__ $exp:expr; for $item:pat in $iter:expr; $($tail:tt)+) => (
+            for $item in $iter {
                 iterc!(@__ $exp; $($tail)+)
             }
-        }
-    );
+        );
 
-    (@__ $exp:expr; for $item:pat in $iter:expr; $($tail:tt)+) => (
-        for $item in $iter {
-            iterc!(@__ $exp; $($tail)+)
-        }
-    );
-
-    ($exp:expr; $($tail:tt)+) => ({
-        let mut generator = || {
-            iterc!(@__ $exp; $($tail)+)
-        };
-        ::mapcomp::GeneratorIterator::new(generator)
-    });
+        ($exp:expr; $($tail:tt)+) => ({
+            let mut coroutine = #[coroutine] || {
+                iterc!(@__ $exp; $($tail)+)
+            };
+            ::mapcomp::iterator_comprehension::CoroutineIterator::new(coroutine)
+        });
+    }
 }
 
 /// Vector Comprehension
