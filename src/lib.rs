@@ -1,4 +1,3 @@
-
 //! Macros for container comprehensions similar to Python's list comprehension.
 //!
 //! This crate adds vector, set, map, and generator comprehensions.  It is
@@ -46,36 +45,32 @@
 //! # }
 //! ```
 
-
-#![feature(generators, generator_trait, arbitrary_self_types)]
-
+#![feature(coroutines, coroutine_trait, arbitrary_self_types)]
 
 /// This is an implementation detail used by `iterc!()` and it should not be
 /// directly instantiated.
 #[doc(hidden)]
-pub struct GeneratorIterator<G: ::std::ops::Generator + ::std::marker::Unpin> {
+pub struct GeneratorIterator<G: ::std::ops::Coroutine + ::std::marker::Unpin> {
     generator: G,
 }
 
-impl<G: ::std::ops::Generator + ::std::marker::Unpin> GeneratorIterator<G> {
+impl<G: ::std::ops::Coroutine + ::std::marker::Unpin> GeneratorIterator<G> {
     pub fn new(generator: G) -> GeneratorIterator<G> {
         GeneratorIterator { generator }
     }
 }
 
-impl<G: ::std::ops::Generator + ::std::marker::Unpin> Iterator for GeneratorIterator<G> {
+impl<G: ::std::ops::Coroutine + ::std::marker::Unpin> Iterator for GeneratorIterator<G> {
     type Item = G::Yield;
 
     fn next(&mut self) -> Option<Self::Item> {
-        use ::std::ops::GeneratorState;
+        use ::std::ops::CoroutineState;
         match ::std::pin::Pin::new(&mut self.generator).resume(()) {
-            GeneratorState::Yielded(y) => Some(y),
+            CoroutineState::Yielded(y) => Some(y),
             _ => None,
         }
     }
 }
-
-
 
 /// Iterator Comprehension
 ///
@@ -156,8 +151,6 @@ macro_rules! iterc {
     });
 }
 
-
-
 /// Vector Comprehension
 ///
 /// Creates a new `Vec` from the contents of the comprehension.  Vector
@@ -178,7 +171,7 @@ macro_rules! iterc {
 /// let items = [4, 7, 2];
 ///
 /// let even_squares = vecc![x*x; for x in &items; if x % 2 == 0];
-/// 
+///
 /// assert_eq!(even_squares, vec![16, 4]);
 /// # }
 /// ```
@@ -218,8 +211,6 @@ macro_rules! vecc {
         ret
     });
 }
-
-
 
 /// Hash Set Comprehension
 ///
@@ -284,8 +275,6 @@ macro_rules! hashsetc {
         ret
     });
 }
-
-
 
 /// Hash Map Comprehension
 ///
@@ -352,8 +341,6 @@ macro_rules! hashmapc {
     });
 }
 
-
-
 /// BTree Set Comprehension
 ///
 /// Creates a `BTreeSet` from the contents of the comprehension.  Same syntax as
@@ -408,8 +395,6 @@ macro_rules! btreesetc {
         ret
     });
 }
-
-
 
 /// BTree Map Comprehension
 ///
@@ -472,4 +457,3 @@ mod tests {
         let _v = vecc![x * x; for x in 1..10; if x % 2 == 0];
     }
 }
-
