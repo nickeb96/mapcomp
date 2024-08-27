@@ -7,7 +7,7 @@ license = "MIT OR Apache-2.0"
 readme = "README.md"
 description = "Python-like list comprehensions for standard containers"
 categories = ["rust-patterns"]
-keywords = ["vector", "comprehension", "macro", "generator", "python"]
+keywords = ["vector", "comprehension", "macro", "coroutine", "python"]
 repository = "https://github.com/nickeb96/mapcomp"
 documentation = "https://docs.rs/mapcomp"
 
@@ -15,3 +15,9 @@ documentation = "https://docs.rs/mapcomp"
 travis-ci = { repository = "nickeb96/mapcomp" }
 
 [dependencies]
+
+[features]
+coroutines = []
+
+[package.metadata.docs.rs]
+features = ["coroutines"]

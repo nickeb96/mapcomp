@@ -14,7 +14,7 @@ containers:
 - `BTreeMap`
 - `BTreeSet`
 
-Also provides another macro for generator comprehension.
+Also provides another macro for coroutine comprehension.
 
 For more info please read the [documentation here](https://docs.rs/mapcomp).
 
